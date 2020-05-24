@@ -2,7 +2,7 @@ from csv import reader
 from numpy import array, append, asfarray
 
 def add_1s_column(matrix:array) -> array:
-    """Add a one's column to the left-most column of the array"""
+    """Add a ones column to the left-most column of the array"""
     return append(array([[1]*len(matrix)]).T, matrix, axis=1)
 
 def read_data(data_path:str, delimiter=",", use_headers=False) -> array:
