@@ -31,6 +31,10 @@ class LinearRegression:
         else:
             return dot(add_1s_column(predictors), self.coefficients)
 
+    def R2(self, test_predictors:array, test_responses:array, design=False):
+        """Compute the fraction of variance in the response explained by the predictors"""
+        return (1 - self.RSS(test_predictors, test_responses, design)/sum([(y-test_responses.mean())**2 for y in test_responses]))[0]
+
     def RSS(self, test_predictors:array, test_responses:array, design=False):
         """Compute the RSS for a given set of data. Set design=True if test_predictors is given as a design matrix"""
         if design:
@@ -63,8 +67,6 @@ class LinearRegression:
 
         return result
 
-
-
 if __name__ == "__main__":
     data = read_data("data.csv")
     model = LinearRegression()
@@ -73,3 +75,4 @@ if __name__ == "__main__":
     print(model.RSS(data[0], data[1], True))
     print(model.RSE2())
     print(model.coefficient_CI(0.95))
+    print(model.R2(data[0],data[1],True))
