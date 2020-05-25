@@ -1,7 +1,7 @@
 from read_data import read_data, add_1s_column
 from numpy.linalg import inv
 from numpy import dot, array, diag
-from scipy.stats import t
+from scipy.stats import t, ttest_1samp
 
 
 class LinearRegression:
@@ -90,6 +90,21 @@ class LinearRegression:
         rss = self.calculate_rss(self.training_design, self.training_response, design)
         return ((self.calculate_tss() - rss) / self.features) / ((rss) / (self.training_n - self.features - 1))
 
+    def calculate_t_statistic(self):
+        coeff_se = (diag(self.calculate_squared_rse() * inv(dot(self.training_design.T, self.training_design)))) ** .5
+        return_array = []
+        for i in range(len(coeff_se)):
+            return_array.append(self.coefficients[i,0]/coeff_se[i])
+        return return_array
+
+    def calculate_p_values(self, t_statistics:array):
+        df = self.training_n - self.features - 1;
+        return_array = []
+        for t_stat in t_statistics:
+            return_array.append(t.sf(abs(t_stat),df))
+        return return_array
+
+
 
 if __name__ == "__main__":
     data = read_data("data.csv")
@@ -107,3 +122,7 @@ if __name__ == "__main__":
     print(model.calculate_r2(data[0], data[1], True))
     print("F-Statistic: ", end=" ")
     print(model.calculate_f_statistic(True))
+    print("T-statics for the coefficients: ", end=" ")
+    print(model.calculate_t_statistic())
+    print("P-Values for the coefficients: ", end=" ")
+    print(model.calculate_p_values(model.calculate_t_statistic()))
