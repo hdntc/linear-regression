@@ -32,12 +32,12 @@ class LinearRegression:
         else:
             return dot(add_1s_column(predictors), self.coefficients)
 
-    def R2(self, test_predictors: array, test_responses: array, design=False):
+    def calculate_r2(self, test_predictors: array, test_responses: array, design=False):
         """Compute the fraction of variance in the response explained by the predictors"""
-        return (1 - self.RSS(test_predictors, test_responses, design) / sum(
+        return (1 - self.calculate_rss(test_predictors, test_responses, design) / sum(
             [(y - test_responses.mean()) ** 2 for y in test_responses]))[0]
 
-    def RSS(self, test_predictors: array, test_responses: array, design=False):
+    def calculate_rss(self, test_predictors: array, test_responses: array, design=False):
         """Compute the RSS for a given set of data. Set design=True if test_predictors is given as a design matrix"""
         if design:
             errors = test_responses - dot(test_predictors, self.coefficients)
@@ -46,12 +46,12 @@ class LinearRegression:
 
         return dot(errors.T, errors)[0][0]
 
-    def RSE2(self):
+    def calculate_squared_rse(self):
         """Compute the squared RSE (Residual standard error), an estimate for the variance of e in Y = f(X) + e"""
-        return self.RSS(self.training_design, self.training_response, design=True) / (
-                    self.training_n - self.features - 1)
+        return self.calculate_rss(self.training_design, self.training_response, design=True) / (
+                self.training_n - self.features - 1)
 
-    def coefficient_CI(self, confidence_level):
+    def calculate_coefficient_ci(self, confidence_level):
         """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence"""
         """confidence_level should be in (0.00, 1.00)"""
         """RSE2() * inv(dot(...)) returns the covariance matrix for the """
@@ -60,7 +60,7 @@ class LinearRegression:
         if not 0 < confidence_level < 1:
             raise Exception("Invalid level of confidence; confidence_level must be between 0 and 1")
         t_value = t.ppf(confidence_level / 2 + 0.5, self.training_n - self.features - 1)
-        coeff_se = (diag(self.RSE2() * inv(dot(self.training_design.T, self.training_design)))) ** .5
+        coeff_se = (diag(self.calculate_squared_rse() * inv(dot(self.training_design.T, self.training_design)))) ** .5
         result = []
 
         for (i, se) in enumerate(coeff_se):
@@ -70,18 +70,40 @@ class LinearRegression:
 
         return result
 
+    def calculate_tss(self):
+        """Calculates True Sum of Squares for a set of training responses"""
+        average = 0
+        sum = 0
+        for response in self.training_response:
+            average += response
+        average /= self.training_response.size
+        for response in self.training_response:
+            val = pow(response - average, 2)
+            sum += val
+        return sum
+
+    def calculate_f_statistic(self, design=False):
+        """calculates F-statistic for a regression model"""
+        """F-statistic should be greater than 1"""
+        """An F-statistic close to 1 indicates that H0 is correct"""
+        """Assumes that the data has already been fit"""
+        rss = self.calculate_rss(self.training_design, self.training_response, design)
+        return ((self.calculate_tss() - rss) / self.features) / ((rss) / (self.training_n - self.features - 1))
+
 
 if __name__ == "__main__":
     data = read_data("data.csv")
     model = LinearRegression()
     model.fit(data[0], data[1])
-    print("Predict X1 = 10, X2 = 3: ",end=" ")
+    print("Predict X1 = 10, X2 = 3: ", end=" ")
     print(model.predict(array([[10, 3]])))
-    print("Minimized RSS: ", end= " ")
-    print(model.RSS(data[0], data[1], True))
+    print("Minimized RSS: ", end=" ")
+    print(model.calculate_rss(data[0], data[1], True))
     print("Squared RSE: ", end=" ")
-    print(model.RSE2())
+    print(model.calculate_squared_rse())
     print("95% Confidence Interval: ", end=" ")
-    print(model.coefficient_CI(0.95))
+    print(model.calculate_coefficient_ci(0.95))
     print("R^2: ", end=" ")
-    print(model.R2(data[0], data[1], True))
+    print(model.calculate_r2(data[0], data[1], True))
+    print("F-Statistic: ", end=" ")
+    print(model.calculate_f_statistic(True))
