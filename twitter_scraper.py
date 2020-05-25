@@ -1,5 +1,7 @@
 import time
 import tweepy
+import read_data
+from numpy import asfarray, array
 
 
 class TwitterScraper:
@@ -16,14 +18,39 @@ class TwitterScraper:
 
     def scrape_user(self, user, count):
         tweets = []
-
         try:
-            for tweet in self.api.user_timeline(user=user, count=count):
-                print(tweet)
-                tweets.append((tweet.text))
+            for tweet in self.api.user_timeline(id=user, count=count):
+                tweets.append(tweet)
 
         except BaseException as e:
             print('failed on_status,', str(e))
             time.sleep(3)
 
         return tweets
+
+
+def remove_retweets(tweets):
+    new_tweets = []
+    for tweet in tweets:
+        if not tweet.retweeted:
+            new_tweets.append(tweet)
+    return new_tweets
+
+def format_tweets_as_training_data(tweets):
+    """take list of tweets and form design matrix and responses based on these critera:
+    responses: # of likes
+    predictors: retweet count, # of hashtags, media(boolean), reply(boolean), quote tweet(boolean)
+    """
+    responses = ([])
+    training_data = ([])
+
+    for tweet in tweets:
+        responses.append(tweet.favorite_count)
+        training_data.append([tweet.retweet_count, len(tweet.entities["hashtags"]), int('media' in tweet.entities),
+                              int(tweet.in_reply_to_screen_name!=None), int(tweet.is_quote_status)])
+
+
+    training_data = read_data.add_1s_column(training_data)
+
+    data = asfarray(training_data, float), asfarray(asfarray(responses, float).reshape(-1,1),float)
+    return data
