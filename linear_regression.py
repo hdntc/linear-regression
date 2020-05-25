@@ -1,8 +1,7 @@
 from read_data import add_1s_column, remove_1s_column
 from numpy.linalg import inv
 from numpy import dot, array, diag
-from scipy.stats import t
-
+from scipy.stats import t, f
 
 class LinearRegression:
     """This class contains data and methods necessary for performing linear regression analysis.
@@ -62,7 +61,11 @@ class LinearRegression:
         """calculates F-statistic for a regression model
         F-statistic should be greater than 1
         An F-statistic close to 1 indicates that H0 cannot be rejected"""
-        return calculate_f_statistic(self.training_design, self.training_response, self.coefficients, self.training_n-self.features-1, self.features, design)
+        return calculate_f_statistic(self.training_design, self.training_response, self.coefficients, design)
+
+    def calculate_f_p_value(self, design=False)
+        """The p-value in the hypothesis test for correlation between any of the variables and the response"""
+        return calculate_f_p_value(self.training_design, self.training_response, self.coefficients, design)
 
     def calculate_t_statistic(self):
         """finds and returns an array of t-statistics for all coefficients"""
@@ -156,21 +159,27 @@ def calculate_p_values(t_statistics: array, df):
     return return_array
 
 
-def calculate_f_statistic(training_design: array, training_response: array, coefficients, df, features=1, design=False):
+def calculate_f_statistic(training_design: array, training_response: array, coefficients, design=False):
     """calculates F-statistic for a regression model
     F-statistic should be greater than 1
     An F-statistic close to 1 indicates that H0 cannot be rejected
     Assumes that the data has already been fit"""
+    df = len(training_design) - len(training_design.T)
     rss = calculate_rss(training_design, training_response, coefficients, design)
-    return ((calculate_tss(training_response) - rss) / features) / (
+    return ((calculate_tss(training_response) - rss) / (len(training_design.T)-1)) / (
             rss / df)
 
 
+def calculate_f_p_value(training_design, training_response, coefficients, design=False):
+    """Find the p-value for the F statistic"""
+    features = len(training_design.T)-1
+    n = len(training_design)
+
+    return f.sf(calculate_f_statistic(training_design, training_response, coefficients, design), features-1, n-features)
+
 def calculate_leverage_statistic(training_design: array):
     """Calculates the leverage statistics for training data"""
-    print(training_design)
-    h = dot(dot(inv(dot(training_design.T,training_design)),training_design),training_design.T)
-    print(h)
+    h = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
     return_array = []
     for i in range(len(h)):
         return_array.append(h[i,i])
