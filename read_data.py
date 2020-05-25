@@ -6,13 +6,13 @@ def add_1s_column(matrix: array) -> array:
     """Add a ones column to the left-most column of the array"""
     return append(array([[1] * len(matrix)]).T, matrix, axis=1)
 
+
 def remove_1s_column(matrix: array) -> array:
     """Remove a ones columns from the left-most column of the array"""
     new_array = []
     for i in range(len(matrix)):
-        new_array.append(matrix[i,1:])
+        new_array.append(matrix[i, 1:])
     return asfarray(new_array, float)
-
 
 
 def read_data(data_path: str, delimiter=",", use_headers=False) -> array:
@@ -27,9 +27,9 @@ def read_data(data_path: str, delimiter=",", use_headers=False) -> array:
         rows = array([row for row in data_reader])
         rows = rows[1:] if use_headers else rows  # If headers are used, omit them, otherwise do nothing
         features = len(rows[0]) - 1  # Every row has has values for X1, X2, ... , Xp and y, this is features+1 columns
-                                     # index of the response vector in rows = features
+        # index of the response vector in rows = features
 
-        if features+1 > len(rows):
+        if features + 1 > len(rows):
             raise Exception("N should be greater than # of features+1")
 
         design_matrix = add_1s_column(rows[:, :features])
