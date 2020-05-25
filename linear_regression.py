@@ -1,4 +1,4 @@
-from read_data import add_1s_column
+from read_data import add_1s_column, remove_1s_column
 from numpy.linalg import inv
 from numpy import dot, array, diag
 from scipy.stats import t
@@ -72,6 +72,10 @@ class LinearRegression:
     def calculate_p_values(self, t_statistics: array):
         """finds and returns an array of p-values for all coefficients"""
         return calculate_p_values(t_statistics, self.training_n-self.features-1)
+
+    def calculate_leverage_statistic(self):
+        """Calculates the leverage statistics for training data"""
+        return calculate_leverage_statistic(remove_1s_column(self.training_design))
 
 
 def predict(predictors: array, coefficients: array, design=False):
@@ -160,3 +164,14 @@ def calculate_f_statistic(training_design: array, training_response: array, coef
     rss = calculate_rss(training_design, training_response, coefficients, design)
     return ((calculate_tss(training_response) - rss) / features) / (
             rss / df)
+
+
+def calculate_leverage_statistic(training_design: array):
+    """Calculates the leverage statistics for training data"""
+    print(training_design)
+    h = dot(dot(inv(dot(training_design.T,training_design)),training_design),training_design.T)
+    print(h)
+    return_array = []
+    for i in range(len(h)):
+        return_array.append(h[i,i])
+    return return_array

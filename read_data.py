@@ -6,6 +6,14 @@ def add_1s_column(matrix: array) -> array:
     """Add a ones column to the left-most column of the array"""
     return append(array([[1] * len(matrix)]).T, matrix, axis=1)
 
+def remove_1s_column(matrix: array) -> array:
+    """Remove a ones columns from the left-most column of the array"""
+    new_array = []
+    for i in range(len(matrix)):
+        new_array.append(matrix[i,1:])
+    return asfarray(new_array, float)
+
+
 
 def read_data(data_path: str, delimiter=",", use_headers=False) -> array:
     """Read data from the .csv file. Return the design matrix and the response values"""
