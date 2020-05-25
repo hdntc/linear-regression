@@ -28,14 +28,13 @@ class LinearRegression:
         if self.coefficients.size == 0:
             raise Exception("Cannot predict before fitting model")
         if design:
-            return dot(predictors, self.coefficients)
+            return dot(predictors, self.coefficients)[0][0]
         else:
-            return dot(add_1s_column(predictors), self.coefficients)
+            return dot(add_1s_column(predictors), self.coefficients)[0][0]
 
     def calculate_r2(self, test_predictors: array, test_responses: array, design=False):
         """Compute the fraction of variance in the response explained by the predictors"""
-        return (1 - self.calculate_rss(test_predictors, test_responses, design) / sum(
-            [(y - test_responses.mean()) ** 2 for y in test_responses]))[0]
+        return 1 - self.calculate_rss(test_predictors, test_responses, design)/self.calculate_tss(test_responses)
 
     def calculate_rss(self, test_predictors: array, test_responses: array, design=False):
         """Compute the RSS for a given set of data. Set design=True if test_predictors is given as a design matrix"""
@@ -44,7 +43,7 @@ class LinearRegression:
         else:
             errors = test_responses - self.predict(test_predictors)
 
-        return dot(errors.T, errors)[0][0]
+        return dot(errors.T, errors)
 
     def calculate_squared_rse(self):
         """Compute the squared RSE (Residual standard error), an estimate for the variance of e in Y = f(X) + e"""
@@ -70,17 +69,10 @@ class LinearRegression:
 
         return result
 
-    def calculate_tss(self):
-        """Calculates True Sum of Squares for a set of training responses"""
-        average = 0
-        sum = 0
-        for response in self.training_response:
-            average += response
-        average /= self.training_response.size
-        for response in self.training_response:
-            val = pow(response - average, 2)
-            sum += val
-        return sum
+    def calculate_tss(self, test_response):
+        """Calculates Total Sum of Squares for a set of testing responses"""
+        deviations = test_response - test_response.mean()
+        return dot(deviations.T, deviations)
 
     def calculate_f_statistic(self, design=False):
         """calculates F-statistic for a regression model"""
@@ -88,7 +80,7 @@ class LinearRegression:
         """An F-statistic close to 1 indicates that H0 is correct"""
         """Assumes that the data has already been fit"""
         rss = self.calculate_rss(self.training_design, self.training_response, design)
-        return ((self.calculate_tss() - rss) / self.features) / ((rss) / (self.training_n - self.features - 1))
+        return ((self.calculate_tss(self.training_response) - rss) / self.features) / ((rss) / (self.training_n - self.features - 1))
 
 
 if __name__ == "__main__":
@@ -102,8 +94,9 @@ if __name__ == "__main__":
     print("Squared RSE: ", end=" ")
     print(model.calculate_squared_rse())
     print("95% Confidence Interval: ", end=" ")
-    print(model.calculate_coefficient_ci(0.95))
+    print(model.calculate_coefficient_ci(0.99))
     print("R^2: ", end=" ")
     print(model.calculate_r2(data[0], data[1], True))
     print("F-Statistic: ", end=" ")
     print(model.calculate_f_statistic(True))
+    print(model.calculate_tss(data[1]))
