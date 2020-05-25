@@ -21,6 +21,9 @@ def read_data(data_path: str, delimiter=",", use_headers=False) -> array:
         features = len(rows[0]) - 1  # Every row has has values for X1, X2, ... , Xp and y, this is features+1 columns
                                      # index of the response vector in rows = features
 
+        if features+1 < len(rows):
+            raise Exception("N should be greater than # of features+1")
+
         design_matrix = add_1s_column(rows[:, :features])
 
         return asfarray(design_matrix, float), asfarray(rows[:, features].reshape((-1, 1)), float)

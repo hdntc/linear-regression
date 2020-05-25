@@ -5,6 +5,13 @@ from scipy.stats import t
 
 
 class LinearRegression:
+    """This class contains data and methods necessary for performing linear regression analysis.
+
+    This class supports both simple linear regression and multiple linear regression methods, but currently
+    does not support interactions. Currently supported features are: simple and multiple linear fitting,
+    RSS and RSE, R^2, t-statistics, p-values, and confidence intervals.
+    """
+
     def __init__(self):
         self.coefficients = array([])
         self.training_design = array([])
@@ -13,8 +20,8 @@ class LinearRegression:
         self.training_n = 0
 
     def fit(self, design: array, response: array):
-        """Fit the linear regression model to the training data."""
-        """The least-squares normal equation is used to estimate the coefficients."""
+        """Fit the linear regression model to the training data.
+        The least-squares normal equation is used to estimate the coefficients."""
 
         self.coefficients = dot(inv(dot(design.T, design)), dot(design.T, response))
         self.training_design = design
@@ -23,8 +30,8 @@ class LinearRegression:
         self.training_n = len(design)
 
     def predict(self, predictors: array, design=False):
-        """Use the coefficients to predict the response(s) for given values for the predictors"""
-        """If predictors is in design-matrix format then design should be True"""
+        """Use the coefficients to predict the response(s) for given values for the predictors
+        If predictors is in design-matrix format then design should be True"""
         return predict(predictors, self.coefficients, design)
 
     def calculate_r2(self, test_predictors: array, test_responses: array, design=False):
@@ -40,10 +47,10 @@ class LinearRegression:
         return calculate_squared_rse(self.training_design, self.training_response, self.coefficients, self.training_n - self.features - 1)
 
     def calculate_coefficient_ci(self, confidence_level):
-        """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence"""
-        """confidence_level should be in (0.00, 1.00)"""
-        """RSE2() * inv(dot(...)) returns the covariance matrix for the """
-        """The confidence interval is derived from (Bj - Bjhat)/SE(Bjhat) ~ t_{n-p-1}"""
+        """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence
+        confidence_level should be in (0.00, 1.00)
+        RSE2() * inv(dot(...)) returns the covariance matrix for the
+        The confidence interval is derived from (Bj - Bjhat)/SE(Bjhat) ~ t_{n-p-1}"""
         return calculate_coefficient_ci(self.training_design, self.training_response, self.coefficients, confidence_level,
                                         self.training_n - self.features - 1)
 
@@ -52,23 +59,24 @@ class LinearRegression:
         calculate_tss(test_response)
 
     def calculate_f_statistic(self, design=False):
-        """calculates F-statistic for a regression model"""
-        """F-statistic should be greater than 1"""
-        """An F-statistic close to 1 indicates that H0 is correct"""
-        """Assumes that the data has already been fit"""
+        """calculates F-statistic for a regression model
+        F-statistic should be greater than 1
+        An F-statistic close to 1 indicates that H0 cannot be rejected"""
         return calculate_f_statistic(self.training_design, self.training_response, self.coefficients, self.training_n-self.features-1, self.features, design)
 
     def calculate_t_statistic(self):
+        """finds and returns an array of t-statistics for all coefficients"""
         return calculate_t_statistic(self.training_design, self.training_response, self.coefficients,
                                      self.training_n - self.features - 1)
 
     def calculate_p_values(self, t_statistics: array):
+        """finds and returns an array of p-values for all coefficients"""
         return calculate_p_values(t_statistics, self.training_n-self.features-1)
 
 
 def predict(predictors: array, coefficients: array, design=False):
-    """Use the coefficients to predict the response(s) for given values for the predictors"""
-    """If predictors is in design-matrix format then design should be True"""
+    """Use the coefficients to predict the response(s) for given values for the predictors
+    If predictors is in design-matrix format then design should be True"""
     if coefficients.size == 0:
         raise Exception("Cannot predict before fitting model")
     if design:
@@ -106,10 +114,10 @@ def calculate_r2(test_predictors: array, test_responses: array, coefficients: ar
 
 def calculate_coefficient_ci(training_design: array, training_response: array, coefficients: array, confidence_level,
                              df):
-    """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence"""
-    """confidence_level should be in (0.00, 1.00)"""
-    """RSE2() * inv(dot(...)) returns the covariance matrix for the """
-    """The confidence interval is derived from (Bj - Bjhat)/SE(Bjhat) ~ t_{n-p-1}"""
+    """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence
+    confidence_level should be in (0.00, 1.00)
+    RSE2() * inv(dot(...)) returns the covariance matrix for the
+    The confidence interval is derived from (Bj - Bjhat)/SE(Bjhat) ~ t_{n-p-1}"""
 
     if not 0 < confidence_level < 1:
         raise Exception("Invalid level of confidence; confidence_level must be between 0 and 1")
@@ -127,6 +135,7 @@ def calculate_coefficient_ci(training_design: array, training_response: array, c
 
 
 def calculate_t_statistic(training_design: array, training_response: array, coefficients: array, df):
+    """finds and returns an array of t-statistics for all coefficients"""
     coef_se = (diag(calculate_squared_rse(training_design, training_response, coefficients, df) * inv(
         dot(training_design.T, training_design)))) ** .5
     return_array = []
@@ -136,6 +145,7 @@ def calculate_t_statistic(training_design: array, training_response: array, coef
 
 
 def calculate_p_values(t_statistics: array, df):
+    """finds and returns an array of p-values for all coefficients"""
     return_array = []
     for t_stat in t_statistics:
         return_array.append(t.sf(abs(t_stat), df))
@@ -143,10 +153,10 @@ def calculate_p_values(t_statistics: array, df):
 
 
 def calculate_f_statistic(training_design: array, training_response: array, coefficients, df, features=1, design=False):
-    """calculates F-statistic for a regression model"""
-    """F-statistic should be greater than 1"""
-    """An F-statistic close to 1 indicates that H0 is correct"""
-    """Assumes that the data has already been fit"""
+    """calculates F-statistic for a regression model
+    F-statistic should be greater than 1
+    An F-statistic close to 1 indicates that H0 cannot be rejected
+    Assumes that the data has already been fit"""
     rss = calculate_rss(training_design, training_response, coefficients, design)
     return ((calculate_tss(training_response) - rss) / features) / (
             rss / df)
