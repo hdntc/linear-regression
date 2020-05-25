@@ -1,8 +1,9 @@
 from read_data import read_data
 import linear_regression as linear_regression
 from numpy import array
+import twitter_scraper
 
-if __name__ == "__main__":
+def data_test():
     data = read_data("data.csv")
     model = linear_regression.LinearRegression()
     model.fit(data[0], data[1])
@@ -25,3 +26,9 @@ if __name__ == "__main__":
     print(model.calculate_p_values(model.calculate_t_statistic()))
     print("Leverage Statistics for the training data: ")
     print(model.calculate_leverage_statistic())
+    print(model.coefficients)
+
+if __name__ == "__main__":
+    my_bot = twitter_scraper.TwitterScraper()
+    tweets = my_bot.scrape_user("TouhouHomophobe",1)
+    print(tweets)

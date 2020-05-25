@@ -169,7 +169,7 @@ def calculate_f_statistic(training_design: array, training_response: array, coef
 def calculate_leverage_statistic(training_design: array):
     """Calculates the leverage statistics for training data"""
     print(training_design)
-    h = dot(dot(inv(dot(training_design.T,training_design)),training_design),training_design.T)
+    h = dot(dot(inv(dot(training_design.T,training_design)),training_design.T),training_design)
     print(h)
     return_array = []
     for i in range(len(h)):
