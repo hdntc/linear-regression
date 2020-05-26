@@ -179,8 +179,5 @@ def calculate_f_p_value(training_design, training_response, coefficients, design
 
 def calculate_leverage_statistic(training_design: array):
     """Calculates the leverage statistics for training data"""
-    h = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
-    return_array = []
-    for i in range(len(h)):
-        return_array.append(h[i,i])
-    return return_array
+    H = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
+    return diag(H)
