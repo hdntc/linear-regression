@@ -38,9 +38,9 @@ def data_test(training_data=None, read_from_file=True):
 
 if __name__ == "__main__":
     my_bot = twitter_scraper.TwitterScraper()
-    tweets = my_bot.scrape_user('BarackObama', 300)
+    tweets = my_bot.scrape_user('BarackObama', 500)
     tweets = twitter_scraper.remove_retweets(tweets)
     data = twitter_scraper.format_tweets_as_training_data(tweets)
 
-    data_test(data, True)
+    data_test(data, False)
     print("X0 = intercept, X1 = # of retweets, X2 = has_media, X3 = is_reply, X4 = is_quote_tweet")
