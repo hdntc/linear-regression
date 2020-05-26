@@ -10,8 +10,13 @@ def data_test(training_data=None, read_from_file=True):
         training_data = read_data("data.csv")
 
     model.fit(training_data[0], training_data[1])
-    print("Predict X1 = 10, X2 = 3: ", end=" ")
-    print(model.predict(array([[10, 3]])))
+    print(model.coefficients)
+    if read_from_file or training_data is None:
+        print("Predict X1 = 10, X2 = 3: ", end=" ")
+        print(model.predict(array([[10, 3]])))
+    else:
+        print("Predict X1 = 0, X2 = 0, X3 = 0, X4 = 1: ", end=" ")
+        print(model.predict(array([[0, 0, 0, 1]])))
     print("Minimized RSS: ", end=" ")
     print(model.calculate_rss(training_data[0], training_data[1], True))
     print("Squared RSE: ", end=" ")
@@ -29,17 +34,13 @@ def data_test(training_data=None, read_from_file=True):
     print(model.calculate_p_values(model.calculate_t_statistic()))
     print("Leverage Statistics for the training data: ")
     print(model.calculate_leverage_statistic())
-    print(model.coefficients)
 
 
 if __name__ == "__main__":
     my_bot = twitter_scraper.TwitterScraper()
-    tweets = my_bot.scrape_user('TouhouHomophobe', 10)
+    tweets = my_bot.scrape_user('BarackObama', 300)
     tweets = twitter_scraper.remove_retweets(tweets)
     data = twitter_scraper.format_tweets_as_training_data(tweets)
 
-    print("Twitter Data: ")
-    print(data)
-    print("Read_File: ")
-    print(read_data("data.csv"))
-    data_test(data, False)
+    data_test(data, True)
+    print("X0 = intercept, X1 = # of retweets, X2 = has_media, X3 = is_reply, X4 = is_quote_tweet")

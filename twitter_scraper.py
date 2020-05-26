@@ -39,14 +39,14 @@ def remove_retweets(tweets):
 def format_tweets_as_training_data(tweets):
     """take list of tweets and form design matrix and responses based on these critera:
     responses: # of likes
-    predictors: retweet count, # of hashtags, media(boolean), reply(boolean), quote tweet(boolean)
+    predictors: retweet count, media(boolean), reply(boolean), quote tweet(boolean)
     """
     responses = ([])
     training_data = ([])
 
     for tweet in tweets:
         responses.append(tweet.favorite_count)
-        training_data.append([tweet.retweet_count, len(tweet.entities["hashtags"]), int('media' in tweet.entities),
+        training_data.append([tweet.retweet_count, int('media' in tweet.entities),
                               int(tweet.in_reply_to_screen_name!=None), int(tweet.is_quote_status)])
 
 
