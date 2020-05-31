@@ -9,8 +9,6 @@ def data_test():
 
     model.fit(training_data[0], training_data[1])
     print(model.coefficients)
-    print("Predict X1 = 10, X2 = 3: ", end=" ")
-    print(model.predict(array([[10, 3]])))
     print("Minimized RSS: ", end=" ")
     print(model.calculate_rss(training_data[0], training_data[1], True))
     print("Squared RSE: ", end=" ")
@@ -33,4 +31,3 @@ def data_test():
 if __name__ == "__main__":
 
     data_test()
-    print("X0 = intercept, X1 = # of retweets, X2 = has_media, X3 = is_reply, X4 = is_quote_tweet")

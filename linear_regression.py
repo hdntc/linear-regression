@@ -3,6 +3,7 @@ from numpy.linalg import inv
 from numpy import dot, array, diag
 from scipy.stats import t, f
 
+
 class LinearRegression:
     """This class contains data and methods necessary for performing linear regression analysis.
 
@@ -43,14 +44,16 @@ class LinearRegression:
 
     def calculate_squared_rse(self):
         """Compute the squared RSE (Residual standard error), an estimate for the variance of e in Y = f(X) + e"""
-        return calculate_squared_rse(self.training_design, self.training_response, self.coefficients, self.training_n - self.features - 1)
+        return calculate_squared_rse(self.training_design, self.training_response, self.coefficients,
+                                     self.training_n - self.features - 1)
 
     def calculate_coefficient_ci(self, confidence_level):
         """Compute the confidence interval for the regression coefficients at the confidence_level level of confidence
         confidence_level should be in (0.00, 1.00)
         RSE2() * inv(dot(...)) returns the covariance matrix for the
         The confidence interval is derived from (Bj - Bjhat)/SE(Bjhat) ~ t_{n-p-1}"""
-        return calculate_coefficient_ci(self.training_design, self.training_response, self.coefficients, confidence_level,
+        return calculate_coefficient_ci(self.training_design, self.training_response, self.coefficients,
+                                        confidence_level,
                                         self.training_n - self.features - 1)
 
     def calculate_tss(self, test_response: array):
@@ -74,7 +77,7 @@ class LinearRegression:
 
     def calculate_p_values(self, t_statistics: array):
         """finds and returns an array of p-values for all coefficients"""
-        return calculate_p_values(t_statistics, self.training_n-self.features-1)
+        return calculate_p_values(t_statistics, self.training_n - self.features - 1)
 
     def calculate_leverage_statistic(self):
         """Calculates the leverage statistics for training data"""
@@ -166,18 +169,20 @@ def calculate_f_statistic(training_design: array, training_response: array, coef
     Assumes that the data has already been fit"""
     df = len(training_design) - len(training_design.T)
     rss = calculate_rss(training_design, training_response, coefficients, design)
-    return ((calculate_tss(training_response) - rss) / (len(training_design.T)-1)) / (
+    return ((calculate_tss(training_response) - rss) / (len(training_design.T) - 1)) / (
             rss / df)
 
 
 def calculate_f_p_value(training_design, training_response, coefficients, design=False):
     """Find the p-value for the F statistic"""
-    features = len(training_design.T)-1
+    features = len(training_design.T) - 1
     n = len(training_design)
 
-    return f.sf(calculate_f_statistic(training_design, training_response, coefficients, design), features-1, n-features)
+    return f.sf(calculate_f_statistic(training_design, training_response, coefficients, design), features - 1,
+                n - features)
+
 
 def calculate_leverage_statistic(training_design: array):
     """Calculates the leverage statistics for training data"""
-    H = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
-    return diag(H)
+    h = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
+    return diag(h)
