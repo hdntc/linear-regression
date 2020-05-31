@@ -1,6 +1,7 @@
 from read_data import add_1s_column, remove_1s_column
 from numpy.linalg import inv
 from numpy import dot, array, diag
+import numpy as np
 from scipy.stats import t, f
 
 
@@ -82,6 +83,9 @@ class LinearRegression:
     def calculate_leverage_statistic(self):
         """Calculates the leverage statistics for training data"""
         return calculate_leverage_statistic(remove_1s_column(self.training_design))
+
+    def calculate_vif_statistic(self):
+        return calculate_vif(self.training_design,design=True)
 
 
 def predict(predictors: array, coefficients: array, design=False):
@@ -186,3 +190,20 @@ def calculate_leverage_statistic(training_design: array):
     """Calculates the leverage statistics for training data"""
     h = dot(training_design, dot(inv(dot(training_design.T, training_design)), training_design.T))
     return diag(h)
+
+
+def calculate_vif(training_design: array, design=False):
+    """Calculates VIF (Variation Inflation Factor) for each predictor"""
+    design_matrix = remove_1s_column(training_design) if design else np.copy(training_design)
+    vif_values = []
+    col_size = np.shape(design_matrix)[1]
+    for i in range(col_size):
+        response = design_matrix[:,[i]]
+        vif_model = LinearRegression()
+        vif_design = np.delete(design_matrix,[i],1)
+        vif_design = add_1s_column(vif_design)
+        vif_model.fit(vif_design,response)
+        r2 = vif_model.calculate_r2(vif_design,response,design)
+        vif_values.append(1/(1-r2))
+
+    return vif_values

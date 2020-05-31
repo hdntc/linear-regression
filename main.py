@@ -26,6 +26,7 @@ def data_test():
     print(model.calculate_p_values(model.calculate_t_statistic()))
     print("Leverage Statistics for the training data: ")
     print(model.calculate_leverage_statistic())
+    print(model.calculate_vif_statistic())
 
 
 if __name__ == "__main__":
