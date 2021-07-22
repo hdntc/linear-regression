@@ -33,5 +33,4 @@ def read_data(data_path: str, delimiter=",", use_headers=False) -> array:
             raise Exception("N should be greater than # of features+1")
 
         design_matrix = add_1s_column(rows[:, :features])
-
         return asfarray(design_matrix, float), asfarray(rows[:, features].reshape((-1, 1)), float)
